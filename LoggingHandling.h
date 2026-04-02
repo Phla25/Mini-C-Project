@@ -1,0 +1,4 @@
+#ifndef LOGGINGHANDLING_H
+#define LOGGINGHANDLING_H
+
+#endif

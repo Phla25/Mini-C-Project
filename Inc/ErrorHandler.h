@@ -13,4 +13,17 @@ typedef enum {
     ERR_PHYSICAL_BOUNDS        // Lỗi phần cứng: Giá trị vật lý vô lý (VD: Độ ẩm > 100%)
 } ValidationStatus;
 
+// THÊM MỚI: Cấu trúc để đếm số liệu (Thống kê)
+typedef struct {
+    int total_valid;         // Số bản tin hợp lệ
+    int total_error;         // Số bản tin bị lỗi (ID sai, Timestamp sai...)
+    int total_threshold;     // Số lần vượt ngưỡng
+    int buffer_overflow;     // Số lần tràn bộ đệm
+    int packets_dropped;     // Số bản tin bị bỏ qua/ghi đè
+} SystemReport;
+
+// THÊM MỚI: Khai báo các hàm để file .c triển khai
+void update_stats(ValidationStatus status, SystemReport *report);
+void handle_buffer_error(bool is_full, SystemStats *stats);
+
 #endif

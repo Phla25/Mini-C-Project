@@ -1,0 +1,36 @@
+====================================================
+       BÁO CÁO HỆ THỐNG GIÁM SÁT MÔI TRƯỜNG        
+       Thời gian xuất: Sun Apr 05 21:51:14 2026
+====================================================
+
+--- CẢM BIẾN ID: 1 ---
+Loại thiết bị      : 0 (0:Temp, 1:Humid, 2:Light...)
+Vị trí             : Lat(105834), Lon(21028)
+Số bản tin hợp lệ  : 2
+Số bản tin lỗi/nhiễu: 3
+Giá trị LỚN NHẤT   : 25.500
+Giá trị NHỎ NHẤT   : 25.000
+Giá trị TRUNG BÌNH : 25.250
+----------------------------------------------------
+
+--- CẢM BIẾN ID: 2 ---
+Loại thiết bị      : 1 (0:Temp, 1:Humid, 2:Light...)
+Vị trí             : Lat(105836), Lon(21030)
+Số bản tin hợp lệ  : 1
+Số bản tin lỗi/nhiễu: 1
+Giá trị LỚN NHẤT   : 55.000
+Giá trị NHỎ NHẤT   : 55.000
+Giá trị TRUNG BÌNH : 55.000
+----------------------------------------------------
+
+--- CẢM BIẾN ID: 3 ---
+Loại thiết bị      : 2 (0:Temp, 1:Humid, 2:Light...)
+Vị trí             : Lat(105830), Lon(21025)
+Số bản tin hợp lệ  : 1
+Số bản tin lỗi/nhiễu: 0
+Giá trị LỚN NHẤT   : 50.000
+Giá trị NHỎ NHẤT   : 50.000
+Giá trị TRUNG BÌNH : 50.000
+----------------------------------------------------
+
+============= KẾT THÚC BÁO CÁO =============

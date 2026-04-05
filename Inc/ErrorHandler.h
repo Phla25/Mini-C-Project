@@ -1,6 +1,8 @@
 #ifndef ERRORHANDLER_H
 #define ERRORHANDLER_H
 
+#include <stdbool.h>  // FIX: Thêm vào để bool được định nghĩa trước khi dùng
+
 typedef enum {
     // Nhóm hợp lệ (Được phép lưu vào DataList)
     STATUS_VALID_NORMAL = 0,
@@ -22,8 +24,8 @@ typedef struct {
     int packets_dropped;     // Số bản tin bị bỏ qua/ghi đè
 } SystemReport;
 
-// Khai báo các hàm để file .c triển khai
+// Khai báo prototype (FIX: Không để thân hàm trong .h)
 void update_stats(ValidationStatus status, SystemReport *report);
-void handle_buffer_error(bool is_full, SystemStats *stats);
+void handle_buffer_error(bool is_full, SystemReport *report);
 
 #endif

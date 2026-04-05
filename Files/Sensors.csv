@@ -1,0 +1,4 @@
+id,type,longitude,latitude,min_threshold,max_threshold,sending_cycle,buffer_size
+1,TEMP,21028,105834,15000,35000,1000,100
+2,HUMIDITY,21030,105836,30000,80000,2000,50
+3,LIGHT,21025,105830,0,90000,500,200

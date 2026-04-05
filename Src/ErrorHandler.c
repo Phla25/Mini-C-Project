@@ -1,5 +1,6 @@
 #include "../Inc/ErrorHandler.h"
 #include <stdio.h>
+#include <stdbool.h>
 
 void update_stats(ValidationStatus status, SystemReport *report) {
     if (report == NULL) return;

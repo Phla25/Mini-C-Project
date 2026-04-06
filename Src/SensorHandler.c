@@ -55,7 +55,7 @@ Sensor* findSensorByID(SensorList *list, uint32_t id) {
     return NULL;
 }
 
-/* FIX: Giải phóng cả DataList bên trong trước khi free Sensor */
+/* Giải phóng cả DataList bên trong trước khi free Sensor */
 void deleteSensor(SensorList *list, uint32_t id) {
     Sensor *current = list->head;
     Sensor *prev = NULL;
@@ -69,7 +69,7 @@ void deleteSensor(SensorList *list, uint32_t id) {
             if (current == list->tail) {
                 list->tail = prev;
             }
-            freeDataList(&current->history); // FIX: Giải phóng history trước
+            freeDataList(&current->history);
             free(current);
             return;
         }
@@ -80,7 +80,6 @@ void deleteSensor(SensorList *list, uint32_t id) {
 
 /* Hàm lọc nhiễu dữ liệu đầu vào */
 bool filterSensorData(Sensor *sensor, int32_t raw_value, int32_t *final_value) {
-    // 1. Lọc giá trị bất thường (Outlier Rejection)
     if (sensor->samples_collected > 0) {
         int last_index = (sensor->buffer_index == 0) ? (FILTER_WINDOW_SIZE - 1) : (sensor->buffer_index - 1);
         int32_t last_valid_value = sensor->moving_avg_buffer[last_index];
@@ -89,14 +88,12 @@ bool filterSensorData(Sensor *sensor, int32_t raw_value, int32_t *final_value) {
         }
     }
 
-    // 2. Cập nhật bộ đệm trượt
     sensor->moving_avg_buffer[sensor->buffer_index] = raw_value;
     sensor->buffer_index = (sensor->buffer_index + 1) % FILTER_WINDOW_SIZE;
     if (sensor->samples_collected < FILTER_WINDOW_SIZE) {
         sensor->samples_collected++;
     }
 
-    // 3. Tính trung bình trượt
     int64_t sum = 0;
     for (int i = 0; i < sensor->samples_collected; i++) {
         sum += sensor->moving_avg_buffer[i];
@@ -105,8 +102,24 @@ bool filterSensorData(Sensor *sensor, int32_t raw_value, int32_t *final_value) {
     return true;
 }
 
-/* Hàm cập nhật dữ liệu mới cho cảm biến */
-void updateSensorData(Sensor *sensor, uint64_t timestamp, int32_t value) {
+/* Hàm cập nhật dữ liệu mới — ghi đè node cũ nhất nếu buffer đầy */
+void updateSensorData(Sensor *sensor, uint64_t timestamp, int32_t value, SystemReport *report) {
+    // Nếu buffer đầy: xóa node head (bản tin cũ nhất) trước khi thêm mới
+    if (sensor->buffer_size > 0 && sensor->stat_valid_count >= sensor->buffer_size) {
+        handle_buffer_error(true, report); // Cập nhật thống kê overflow/dropped
+
+        DataNode *old = sensor->history.head;
+        if (old != NULL) {
+            sensor->history.head = old->next;
+            if (sensor->history.head == NULL) {
+                sensor->history.tail = NULL;
+            }
+            sensor->stat_sum -= old->value;  // Trừ giá trị cũ ra khỏi tổng
+            free(old);
+            sensor->stat_valid_count--;  // Nhường chỗ cho bản tin mới
+        }
+    }
+
     sensor->last_seen_timestamp = timestamp;
     appendDataNode(&sensor->history, timestamp, value);
     if (value > sensor->stat_max) sensor->stat_max = value;
@@ -134,16 +147,14 @@ int checkSensorConnections(SensorList *list, uint64_t current_timestamp) {
     return 0;
 }
 
-/* FIX: Bổ sung kiểm tra giới hạn vật lý cho TYPE_TEMP và TYPE_GAS */
+/* Kiểm tra tính hợp lệ và cảnh báo vượt ngưỡng */
 ValidationStatus validateSensorData(Sensor *sensor, uint64_t timestamp, int32_t value) {
     if (sensor == NULL) return ERR_SENSOR_NOT_FOUND;
 
-    // 1. Kiểm tra tính hợp lệ của thời gian
     if (sensor->history.tail != NULL && timestamp <= sensor->history.tail->timestamp) {
         return ERR_INVALID_TIMESTAMP;
     }
 
-    // 2. Kiểm tra giới hạn vật lý theo từng loại cảm biến
     switch (sensor->type) {
         case TYPE_TEMP:
             if (value < TEMP_MIN_PHYSICAL || value > TEMP_MAX_PHYSICAL)
@@ -166,7 +177,6 @@ ValidationStatus validateSensorData(Sensor *sensor, uint64_t timestamp, int32_t 
             break;
     }
 
-    // 3. Phát hiện vượt ngưỡng cảnh báo
     if (value > sensor->max_threshold) return STATUS_WARNING_HIGH;
     if (value < sensor->min_threshold) return STATUS_WARNING_LOW;
 

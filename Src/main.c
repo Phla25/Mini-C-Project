@@ -18,10 +18,9 @@ void processIncomingData(SensorList *list, SystemReport *sysReport,
         return;
     }
 
-    bool is_buffer_full = (sensor->stat_valid_count >= sensor->buffer_size);
-    handle_buffer_error(is_buffer_full, sysReport);
-    if (is_buffer_full) {
-        writeEventLog("WARNING", sensor_id, timestamp, "Buffer day! Ban tin cu bi ghi de.");
+    // Cảnh báo log nếu buffer sắp bị ghi đè (việc ghi đè thực sự xảy ra trong updateSensorData)
+    if (sensor->buffer_size > 0 && sensor->stat_valid_count >= sensor->buffer_size) {
+        writeEventLog("WARNING", sensor_id, timestamp, "Buffer day! Ban tin cu nhat bi ghi de.");
     }
 
     ValidationStatus status = validateSensorData(sensor, timestamp, raw_value);
@@ -39,7 +38,8 @@ void processIncomingData(SensorList *list, SystemReport *sysReport,
 
     int32_t clean_value;
     if (filterSensorData(sensor, raw_value, &clean_value)) {
-        updateSensorData(sensor, timestamp, clean_value);
+        // Truyền sysReport để updateSensorData tự xử lý ghi đè và thống kê
+        updateSensorData(sensor, timestamp, clean_value, sysReport);
     } else {
         sensor->stat_error_count++;
         sysReport->total_error++;
@@ -48,11 +48,10 @@ void processIncomingData(SensorList *list, SystemReport *sysReport,
 }
 
 int main(int argc, char *argv[]) {
-    // Cho phép truyền tên file qua tham số, hoặc dùng tên mặc định
     const char *sensorFile = (argc > 1) ? argv[1] : "sensors.csv";
     const char *dataFile   = (argc > 2) ? argv[2] : "data.csv";
 
-    SensorList  mySystem = {NULL, NULL};
+    SensorList   mySystem = {NULL, NULL};
     SystemReport myReport = {0, 0, 0, 0, 0};
 
     remove("system_events.log");
@@ -79,7 +78,6 @@ int main(int argc, char *argv[]) {
 
     exportFullReport("BaoCao_TongHop.txt", &mySystem);
 
-    // Giải phóng bộ nhớ
     Sensor *cur = mySystem.head;
     while (cur != NULL) {
         Sensor *next = cur->nextSensor;

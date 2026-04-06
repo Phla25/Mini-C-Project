@@ -52,7 +52,7 @@ Mở terminal trong thư mục `project/`, chạy lần lượt:
 gcc Src/main.c Src/ErrorHandler.c Src/DataHandler.c Src/SensorHandler.c Src/LoggingHandler.c Src/CSVHandler.c -o program -I Inc/
 ```
 
-**Bước 2 — Chạy với file CSV mặc định** (`sensors.csv` và `data.csv`):
+**Bước 2 — Chạy với file CSV mặc định** (`Sensors.csv` và `Data.csv`):
 ```bash
 ./program
 ```
@@ -86,7 +86,7 @@ id,type,longitude,latitude,min_threshold,max_threshold,sending_cycle,buffer_size
 | `sending_cycle` | uint32 | Chu kỳ gửi dữ liệu (milliseconds) |
 | `buffer_size` | uint32 | Số bản tin tối đa lưu trong bộ nhớ |
 
-### `data.csv` — Dữ liệu đầu vào
+### `Data.csv` — Dữ liệu đầu vào
 
 ```
 sensor_id,timestamp,raw_value
